@@ -52,12 +52,6 @@ impl Actions {
             .filter(|action| self.0.contains(action))
             .find(|action| action.keys().contains(&key))
     }
-
-    /// Get contextual actions.
-    /// (just for building a help view)
-    pub fn actions(&self) -> &[Action] {
-        self.0.as_slice()
-    }
 }
 
 impl From<Vec<Action>> for Actions {

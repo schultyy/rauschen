@@ -1,12 +1,9 @@
 use tui::backend::Backend;
-use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
+use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Style};
-use tui::text::{Span, Spans};
-use tui::widgets::{Block, BorderType, Borders, Cell, Paragraph, Row, Table, Sparkline, Gauge};
+use tui::widgets::{Block, Borders, Sparkline, Gauge};
 use tui::Frame;
 
-use super::actions::Actions;
-use super::state::AppState;
 use crate::app::App;
 
 pub fn draw<B>(rect: &mut Frame<B>, app: &App)
