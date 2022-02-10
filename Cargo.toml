@@ -17,3 +17,4 @@ eyre = "0.6"
 
 log = "0.4"
 tui-logger = { git = "https://github.com/gin66/tui-logger", rev = "3a3568e2464dddc2205e071234135998342d7f1d" }
+rand="0.8.4"

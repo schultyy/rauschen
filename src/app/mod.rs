@@ -7,6 +7,7 @@ use self::{state::AppState, actions::{Actions, Action}};
 pub mod state;
 pub mod ui;
 mod actions;
+mod random_signal;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum AppReturn {

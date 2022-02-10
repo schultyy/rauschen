@@ -1,5 +1,7 @@
 use std::time::Duration;
 
+use super::random_signal::RandomSignal;
+
 #[derive(Clone)]
 pub enum AppState {
     Init,
@@ -7,18 +9,23 @@ pub enum AppState {
         duration: Duration,
         counter_sleep: u32,
         counter_tick: u64,
+        sparkline_data: Vec<u64>
     },
 }
 
 impl AppState {
     pub fn initialized() -> Self {
+        let mut signal = RandomSignal::new(0, 100);
         let duration = Duration::from_secs(1);
         let counter_sleep = 0;
         let counter_tick = 0;
+        let sparkline_data =  signal.by_ref().take(200).collect::<Vec<u64>>();
+
         Self::Initialized {
             duration,
             counter_sleep,
             counter_tick,
+            sparkline_data
         }
     }
 
@@ -62,6 +69,15 @@ impl AppState {
         }
     }
 
+    pub fn sparkline_data(&self) -> Option<&Vec<u64>> {
+        if let Self::Initialized { sparkline_data, .. } = self {
+            Some(sparkline_data)
+        }
+        else {
+            None
+        }
+    }
+
     pub fn increment_delay(&mut self) {
         if let Self::Initialized { duration, .. } = self {
             // Set the duration, note that the duration is in 1s..10s
@@ -77,6 +93,7 @@ impl AppState {
             *duration = Duration::from_secs(secs);
         }
     }
+
 }
 
 impl Default for AppState {
