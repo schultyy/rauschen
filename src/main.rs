@@ -1,9 +1,12 @@
-use app::App;
+use app::{App, AppReturn};
+use inputs::InputEvent;
+use inputs::events::Events;
 use rodio::Sink;
 use rodio::{Decoder, OutputStream};
 use std::cell::RefCell;
 use std::io::BufReader;
 use std::rc::Rc;
+use std::time::Duration;
 use std::{error::Error, fs::File};
 
 use std::io::stdout;
@@ -15,6 +18,7 @@ use crate::app::ui;
 use eyre::Result;
 
 mod app;
+mod inputs;
 
 fn main() -> Result<()> {
     let app = Rc::new(RefCell::new(App::new())); // TODO app is useless for now
@@ -22,8 +26,6 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-
-#[allow(unreachable_code)]
 pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     // Configure Crossterm backend for tui
     let stdout = stdout();
@@ -33,13 +35,25 @@ pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     terminal.clear()?;
     terminal.hide_cursor()?;
 
+    // User event handler
+    let tick_rate = Duration::from_millis(200);
+    let events = Events::new(tick_rate);
+
     loop {
-        let app = app.borrow();
+        let mut app = app.borrow_mut();
 
         // Render
         terminal.draw(|rect| ui::draw(rect, &app))?;
 
-        // TODO handle inputs here
+        // Handle inputs
+        let result = match events.next()? {
+            InputEvent::Input(key) => app.do_action(key),
+            InputEvent::Tick => app.update_on_tick(),
+        };
+        // Check if we should exit
+        if result == AppReturn::Exit {
+            break;
+        }
     }
 
     // Restore the terminal and close application
