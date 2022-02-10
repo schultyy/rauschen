@@ -28,7 +28,7 @@ pub struct App {
 
 impl App {
     pub fn new() -> Self {
-        let actions = vec![Action::Quit].into();
+        let actions = vec![Action::Quit, Action::VolumeUp, Action::VolumeDown].into();
         let state = AppState::initialized();
         Self { actions, state }
     }
@@ -39,6 +39,14 @@ impl App {
             debug!("Run action [{:?}]", action);
             match action {
                 Action::Quit => AppReturn::Exit,
+                Action::VolumeUp => {
+                    self.state.incr_volume();
+                    AppReturn::Continue
+                },
+                Action::VolumeDown => {
+                    self.state.decr_volume();
+                    AppReturn::Continue
+                }
             }
         } else {
             warn!("No action accociated to {}", key);
@@ -49,7 +57,6 @@ impl App {
     /// We could update the app or dispatch event on tick
     pub fn update_on_tick(&mut self) -> AppReturn {
         // here we just increment a counter
-        self.state.incr_tick();
         self.state.update_sparkline();
         AppReturn::Continue
     }

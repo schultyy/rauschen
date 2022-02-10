@@ -8,7 +8,7 @@ pub enum AppState {
     Initialized {
         duration: Duration,
         counter_sleep: u32,
-        counter_tick: u64,
+        volume: u16,
         signal: RandomSignal,
         sparkline_data: Vec<u64>
     },
@@ -25,7 +25,7 @@ impl AppState {
         Self::Initialized {
             duration,
             counter_sleep,
-            counter_tick,
+            volume: counter_tick,
             signal,
             sparkline_data
         }
@@ -41,9 +41,20 @@ impl AppState {
         }
     }
 
-    pub fn incr_tick(&mut self) {
-        if let Self::Initialized { counter_tick, .. } = self {
-            *counter_tick += 1;
+    pub fn incr_volume(&mut self) {
+        if let Self::Initialized { volume, .. } = self {
+            *volume += 10;
+            if volume >= &mut 100 {
+                *volume = 100;
+            }
+        }
+    }
+
+    pub fn decr_volume(&mut self) {
+        if let Self::Initialized { volume, .. } = self {
+            if volume >= &mut 10 {
+                *volume -= 10;
+            }
         }
     }
 
@@ -55,9 +66,9 @@ impl AppState {
         }
     }
 
-    pub fn count_tick(&self) -> Option<u64> {
-        if let Self::Initialized { counter_tick, .. } = self {
-            Some(*counter_tick)
+    pub fn volume(&self) -> Option<u16> {
+        if let Self::Initialized { volume, .. } = self {
+            Some(*volume)
         } else {
             None
         }

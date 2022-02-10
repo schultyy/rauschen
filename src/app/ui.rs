@@ -25,7 +25,7 @@ where
     let gauge = Gauge::default()
         .block(Block::default().title("Volume").borders(Borders::ALL))
         .gauge_style(Style::default().fg(Color::Yellow))
-        .percent(50);
+        .percent(app.state().volume().unwrap());
     rect.render_widget(gauge, chunks[0]);
 
     let sparkline = Sparkline::default()

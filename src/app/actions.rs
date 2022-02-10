@@ -8,12 +8,14 @@ use crate::inputs::key::Key;
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Action {
     Quit,
+    VolumeUp,
+    VolumeDown
 }
 
 impl Action {
     /// All available actions
     pub fn iterator() -> Iter<'static, Action> {
-        static ACTIONS: [Action; 1] = [Action::Quit];
+        static ACTIONS: [Action; 3] = [Action::Quit, Action::VolumeDown, Action::VolumeUp];
         ACTIONS.iter()
     }
 
@@ -21,6 +23,8 @@ impl Action {
     pub fn keys(&self) -> &[Key] {
         match self {
             Action::Quit => &[Key::Ctrl('c'), Key::Char('q')],
+            Action::VolumeUp => &[Key::Up, Key::PageUp],
+            Action::VolumeDown => &[Key::Down, Key::PageDown],
         }
     }
 }
@@ -30,6 +34,8 @@ impl Display for Action {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let str = match self {
             Action::Quit => "Quit",
+            Action::VolumeUp => "Volume Up",
+            Action::VolumeDown => "Volume Down",
         };
         write!(f, "{}", str)
     }
