@@ -2,12 +2,15 @@ use log::{debug, warn};
 
 use crate::inputs::key::Key;
 
-use self::{state::AppState, actions::{Actions, Action}};
+use self::{
+    actions::{Action, Actions},
+    state::AppState,
+};
 
-pub mod state;
-pub mod ui;
 mod actions;
 mod random_signal;
+pub mod state;
+pub mod ui;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum AppReturn {
@@ -20,7 +23,7 @@ pub struct App {
     /// State
     state: AppState,
     /// Contextual actions
-    actions: Actions
+    actions: Actions,
 }
 
 impl App {
@@ -30,25 +33,26 @@ impl App {
         Self { actions, state }
     }
 
-        /// Handle a user action
-        pub fn do_action(&mut self, key: Key) -> AppReturn {
-            if let Some(action) = self.actions.find(key) {
-                debug!("Run action [{:?}]", action);
-                match action {
-                    Action::Quit => AppReturn::Exit,
-                }
-            } else {
-                warn!("No action accociated to {}", key);
-                AppReturn::Continue
+    /// Handle a user action
+    pub fn do_action(&mut self, key: Key) -> AppReturn {
+        if let Some(action) = self.actions.find(key) {
+            debug!("Run action [{:?}]", action);
+            match action {
+                Action::Quit => AppReturn::Exit,
             }
-        }
-
-        /// We could update the app or dispatch event on tick
-        pub fn update_on_tick(&mut self) -> AppReturn {
-            // here we just increment a counter
-            self.state.incr_tick();
+        } else {
+            warn!("No action accociated to {}", key);
             AppReturn::Continue
         }
+    }
+
+    /// We could update the app or dispatch event on tick
+    pub fn update_on_tick(&mut self) -> AppReturn {
+        // here we just increment a counter
+        self.state.incr_tick();
+        self.state.update_sparkline();
+        AppReturn::Continue
+    }
 
     pub fn state(&self) -> &AppState {
         &self.state

@@ -3,6 +3,7 @@ use rand::{
     rngs::ThreadRng,
 };
 
+#[derive(Clone)]
 pub struct RandomSignal {
     distribution: Uniform<u64>,
     rng: ThreadRng,

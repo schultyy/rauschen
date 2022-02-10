@@ -9,6 +9,7 @@ pub enum AppState {
         duration: Duration,
         counter_sleep: u32,
         counter_tick: u64,
+        signal: RandomSignal,
         sparkline_data: Vec<u64>
     },
 }
@@ -25,6 +26,7 @@ impl AppState {
             duration,
             counter_sleep,
             counter_tick,
+            signal,
             sparkline_data
         }
     }
@@ -75,6 +77,14 @@ impl AppState {
         }
         else {
             None
+        }
+    }
+
+    pub fn update_sparkline(&mut self) {
+        if let Self::Initialized { sparkline_data, signal, .. } = self {
+            let value = signal.next().unwrap();
+            sparkline_data.pop();
+            sparkline_data.insert(0, value);
         }
     }
 
