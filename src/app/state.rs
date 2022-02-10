@@ -1,25 +1,25 @@
+
 use super::random_signal::RandomSignal;
 
-#[derive(Clone)]
 pub enum AppState {
     Init,
     Initialized {
         volume: u16,
         signal: RandomSignal,
-        sparkline_data: Vec<u64>
+        sparkline_data: Vec<u64>,
     },
 }
 
 impl AppState {
     pub fn initialized() -> Self {
         let mut signal = RandomSignal::new(0, 100);
-        let counter_tick = 0;
+        let current_volume = 10;
         let sparkline_data =  signal.by_ref().take(200).collect::<Vec<u64>>();
 
         Self::Initialized {
-            volume: counter_tick,
+            volume: current_volume,
             signal,
-            sparkline_data
+            sparkline_data,
         }
     }
 

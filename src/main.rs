@@ -1,13 +1,9 @@
 use app::{App, AppReturn};
 use inputs::InputEvent;
 use inputs::events::Events;
-use rodio::Sink;
-use rodio::{Decoder, OutputStream};
 use std::cell::RefCell;
-use std::io::BufReader;
 use std::rc::Rc;
 use std::time::Duration;
-use std::{error::Error, fs::File};
 
 use std::io::stdout;
 
@@ -19,6 +15,7 @@ use eyre::Result;
 
 mod app;
 mod inputs;
+mod playback;
 
 fn main() -> Result<()> {
     let app = Rc::new(RefCell::new(App::new())); // TODO app is useless for now
@@ -38,6 +35,7 @@ pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     // User event handler
     let tick_rate = Duration::from_millis(200);
     let events = Events::new(tick_rate);
+    playback::start_playback();
 
     loop {
         let mut app = app.borrow_mut();
@@ -62,22 +60,4 @@ pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     crossterm::terminal::disable_raw_mode()?;
 
     Ok(())
-}
-
-fn playback() -> Result<(), Box<dyn Error>> {
-    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-
-    loop {
-        println!("Starting playback");
-        let file = BufReader::new(File::open("resources/eurostar-car.mp3").unwrap());
-        let source = Decoder::new(file).unwrap();
-
-        let sink = Sink::try_new(&stream_handle).unwrap();
-
-        sink.append(source);
-
-        sink.set_volume(2.0);
-
-        sink.sleep_until_end();
-    }
 }
