@@ -17,7 +17,7 @@ pub fn start_playback() {
 
         loop {
             if sink.empty() {
-                let file = BufReader::new(File::open("resources/eurostar-car.mp3").unwrap());
+                let file = BufReader::new(File::open("resources/eurostar-car.ogg").unwrap());
                 let source = Decoder::new(file).unwrap();
                 sink.append(source);
             }

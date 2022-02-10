@@ -9,7 +9,8 @@ repository = "https://github.com/schultyy/rauschen/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rodio = { version = "0.15.0", features = ["symphonia-mp3"] }
+# rodio = { version = "0.15.0", features = ["symphonia-ogg"] }
+rodio = "0.15"
 tui = { version = "0.17", features = ["crossterm"], default-features = false }
 crossterm = "0.23"
 tokio = { version = "1", features = ["full"] }
