@@ -8,7 +8,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     loop {
         println!("Starting playback");
-        let file = BufReader::new(File::open("resources/eurostar_car.wav").unwrap());
+        let file = BufReader::new(File::open("resources/eurostar-car.mp3").unwrap());
         let source = Decoder::new(file).unwrap();
 
         let sink = Sink::try_new(&stream_handle).unwrap();
