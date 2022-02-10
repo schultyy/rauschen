@@ -6,7 +6,7 @@ use std::{
     time::Duration,
 };
 
-use rodio::{Decoder, OutputStream, Sink, Source};
+use rodio::{Decoder, OutputStream, Sink};
 
 static CMD: AtomicU16 = AtomicU16::new(1);
 
@@ -52,8 +52,4 @@ pub fn start_playback() {
 
 pub fn set_cmd(cmd: u16) {
     CMD.store(cmd, Ordering::SeqCst);
-}
-
-pub fn play() {
-    CMD.store(1, Ordering::SeqCst);
 }

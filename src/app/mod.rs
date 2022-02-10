@@ -1,5 +1,3 @@
-use log::{debug, warn};
-
 use crate::inputs::key::Key;
 
 use self::{
@@ -36,7 +34,6 @@ impl App {
     /// Handle a user action
     pub fn do_action(&mut self, key: Key) -> AppReturn {
         if let Some(action) = self.actions.find(key) {
-            debug!("Run action [{:?}]", action);
             match action {
                 Action::Quit => AppReturn::Exit,
                 Action::VolumeUp => {
@@ -49,7 +46,6 @@ impl App {
                 }
             }
         } else {
-            warn!("No action accociated to {}", key);
             AppReturn::Continue
         }
     }
