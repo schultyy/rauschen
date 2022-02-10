@@ -1,4 +1,6 @@
 
+use crate::playback;
+
 use super::random_signal::RandomSignal;
 
 pub enum AppState {
@@ -33,14 +35,17 @@ impl AppState {
             if volume >= &mut 100 {
                 *volume = 100;
             }
+            playback::set_cmd(volume.to_owned());
         }
     }
 
     pub fn decr_volume(&mut self) {
         if let Self::Initialized { volume, .. } = self {
-            if volume >= &mut 10 {
+            let step: u16 = 10;
+            if volume.clone() - step >= step {
                 *volume -= 10;
             }
+            playback::set_cmd(volume.to_owned());
         }
     }
 
