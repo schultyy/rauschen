@@ -35,9 +35,6 @@ where
     let body = draw_body(false, app.state());
     rect.render_widget(body, body_chunks[0]);
 
-    // let help = draw_help(app.actions());
-    // rect.render_widget(help, body_chunks[1]);
-
     let sparkline = Sparkline::default()
         .block(
             Block::default()
@@ -90,37 +87,4 @@ fn draw_body<'a>(loading: bool, state: &AppState) -> Paragraph<'a> {
             .style(Style::default().fg(Color::White))
             .border_type(BorderType::Plain),
     )
-}
-
-fn draw_help(actions: &Actions) -> Table {
-    let key_style = Style::default().fg(Color::LightCyan);
-    let help_style = Style::default().fg(Color::Gray);
-
-    let mut rows = vec![];
-    for action in actions.actions().iter() {
-        let mut first = true;
-        for key in action.keys() {
-            let help = if first {
-                first = false;
-                action.to_string()
-            } else {
-                String::from("")
-            };
-            let row = Row::new(vec![
-                Cell::from(Span::styled(key.to_string(), key_style)),
-                Cell::from(Span::styled(help, help_style)),
-            ]);
-            rows.push(row);
-        }
-    }
-
-    Table::new(rows)
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .border_type(BorderType::Plain)
-                .title("Help"),
-        )
-        .widths(&[Constraint::Length(11), Constraint::Min(20)])
-        .column_spacing(1)
 }
