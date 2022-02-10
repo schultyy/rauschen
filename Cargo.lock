@@ -25,13 +25,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "asmr"
-version = "0.1.0"
-dependencies = [
- "rodio",
-]
-
-[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -602,6 +595,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "864d3e96a899863136fc6e99f3d7cae289dafe43bf2c5ac19b70df7210c0a145"
 dependencies = [
  "proc-macro2",
+]
+
+[[package]]
+name = "rauschen"
+version = "0.1.0"
+dependencies = [
+ "rodio",
 ]
 
 [[package]]
