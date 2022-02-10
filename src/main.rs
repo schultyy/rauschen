@@ -15,6 +15,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         sink.append(source);
 
+        sink.set_volume(2.0);
+
         sink.sleep_until_end();
     }
 }
