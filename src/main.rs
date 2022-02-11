@@ -1,13 +1,17 @@
 use app::{App, AppReturn};
-use inputs::InputEvent;
 use inputs::events::Events;
+use inputs::InputEvent;
 use std::cell::RefCell;
 use std::fs::File;
 use std::rc::Rc;
 use std::time::Duration;
 
-use std::io::{stdout, self};
+use std::io::{self, stdout};
 
+use log::{LevelFilter, error};
+use log4rs::append::file::FileAppender;
+use log4rs::config::{Appender, Config, Root};
+use log4rs::encode::pattern::PatternEncoder;
 use tui::backend::CrosstermBackend;
 use tui::Terminal;
 
@@ -15,20 +19,20 @@ use crate::app::ui;
 use eyre::Result;
 
 mod app;
+mod home;
 mod inputs;
 mod playback;
-mod home;
-
 
 fn prepare() -> Result<()> {
-    let file_url = "https://github.com/schultyy/rauschen/blob/add-tui/resources/eurostar-car.ogg?raw=true";
+    let file_url =
+        "https://github.com/schultyy/rauschen/blob/add-tui/resources/eurostar-car.ogg?raw=true";
     let app_dir = home::app_dir();
     let local_filename = app_dir.join("eurostar-car.ogg");
 
     home::create_home_dir_if_not_exist()?;
 
     if local_filename.exists() {
-        return Ok(())
+        return Ok(());
     }
 
     let mut response = reqwest::blocking::get(file_url)?;
@@ -38,9 +42,26 @@ fn prepare() -> Result<()> {
     Ok(())
 }
 
+fn init_logger() -> Result<()> {
+    let logfile_path = home::app_dir().join("output.log");
+    let logfile = FileAppender::builder()
+        .encoder(Box::new(PatternEncoder::new("{d} {l} {t} - {m}{n}\n")))
+        .build(logfile_path)?;
+
+    let config = Config::builder()
+        .appender(Appender::builder().build("logfile", Box::new(logfile)))
+        .build(Root::builder().appender("logfile").build(LevelFilter::Info))?;
+
+    log4rs::init_config(config)?;
+    Ok(())
+}
 
 fn main() -> Result<()> {
-    prepare()?;
+    init_logger()?;
+    if let Err(err) = prepare() {
+        error!("{}", err.to_string());
+        return Err(err)
+    }
     let app = Rc::new(RefCell::new(App::new())); // TODO app is useless for now
     start_ui(app)?;
     Ok(())
