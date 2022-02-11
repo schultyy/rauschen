@@ -8,16 +8,19 @@ use std::{
 
 use rodio::{Decoder, OutputStream, Sink};
 
+use crate::home;
+
 static CMD: AtomicU16 = AtomicU16::new(1);
 
 pub fn start_playback() {
     thread::spawn(move || {
+        let filename = home::app_dir().join("eurostar-car.ogg");
         let (_stream, stream_handle) = OutputStream::try_default().unwrap();
         let sink = Sink::try_new(&stream_handle).unwrap();
 
         loop {
             if sink.empty() {
-                let file = BufReader::new(File::open("resources/eurostar-car.ogg").unwrap());
+                let file = BufReader::new(File::open(filename.clone()).unwrap());
                 let source = Decoder::new(file).unwrap();
                 sink.append(source);
             }

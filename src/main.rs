@@ -2,10 +2,12 @@ use app::{App, AppReturn};
 use inputs::InputEvent;
 use inputs::events::Events;
 use std::cell::RefCell;
+use std::fs::File;
+use std::path::Path;
 use std::rc::Rc;
 use std::time::Duration;
 
-use std::io::stdout;
+use std::io::{stdout, Write, self};
 
 use tui::backend::CrosstermBackend;
 use tui::Terminal;
@@ -16,8 +18,30 @@ use eyre::Result;
 mod app;
 mod inputs;
 mod playback;
+mod home;
+
+
+fn prepare() -> Result<()> {
+    let file_url = "https://github.com/schultyy/rauschen/blob/add-tui/resources/eurostar-car.ogg?raw=true";
+    let app_dir = home::app_dir();
+    let local_filename = app_dir.join("eurostar-car.ogg");
+
+    home::create_home_dir_if_not_exist()?;
+
+    if local_filename.exists() {
+        return Ok(())
+    }
+
+    let mut response = reqwest::blocking::get(file_url)?;
+    let mut out = File::create(app_dir.join(local_filename)).expect("failed to create file");
+    io::copy(&mut response, &mut out).expect("failed to copy content");
+
+    Ok(())
+}
+
 
 fn main() -> Result<()> {
+    prepare()?;
     let app = Rc::new(RefCell::new(App::new())); // TODO app is useless for now
     start_ui(app)?;
     Ok(())
