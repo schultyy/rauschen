@@ -1,6 +1,11 @@
 use app::{App, AppReturn};
 use inputs::events::Events;
 use inputs::InputEvent;
+use log4rs::append::rolling_file::policy::compound::roll::fixed_window::FixedWindowRoller;
+use log4rs::append::rolling_file::policy::compound::trigger::size::SizeTrigger;
+use log4rs::append::rolling_file::policy::compound::CompoundPolicy;
+use log4rs::append::rolling_file::RollingFileAppender;
+use log4rs::filter::threshold::ThresholdFilter;
 use std::cell::RefCell;
 use std::fs::File;
 use std::rc::Rc;
@@ -8,7 +13,7 @@ use std::time::Duration;
 
 use std::io::{self, stdout};
 
-use log::{LevelFilter, error};
+use log::{error, LevelFilter};
 use log4rs::append::file::FileAppender;
 use log4rs::config::{Appender, Config, Root};
 use log4rs::encode::pattern::PatternEncoder;
@@ -43,14 +48,36 @@ fn prepare() -> Result<()> {
 }
 
 fn init_logger() -> Result<()> {
+    let window_size = 3; // log0, log1, log2
+    let fixed_window_roller = FixedWindowRoller::builder()
+        .build("log{}", window_size)
+        .unwrap();
+
+    let size_limit = 5 * 1024; // 5KB as max log file size to roll
+    let size_trigger = SizeTrigger::new(size_limit);
+    let compound_policy =
+        CompoundPolicy::new(Box::new(size_trigger), Box::new(fixed_window_roller));
+
     let logfile_path = home::app_dir().join("output.log");
-    let logfile = FileAppender::builder()
-        .encoder(Box::new(PatternEncoder::new("{d} {l} {t} - {m}{n}\n")))
-        .build(logfile_path)?;
 
     let config = Config::builder()
-        .appender(Appender::builder().build("logfile", Box::new(logfile)))
-        .build(Root::builder().appender("logfile").build(LevelFilter::Info))?;
+    .appender(
+        Appender::builder()
+            .filter(Box::new(ThresholdFilter::new(LevelFilter::Debug)))
+            .build(
+                "logfile",
+                Box::new(
+                    RollingFileAppender::builder()
+                        .encoder(Box::new(PatternEncoder::new("{d} {l} {t}::{m}{n}")))
+                        .build(logfile_path, Box::new(compound_policy))?,
+                ),
+            ),
+    )
+    .build(
+        Root::builder()
+            .appender("logfile")
+            .build(LevelFilter::Debug),
+    )?;
 
     log4rs::init_config(config)?;
     Ok(())
@@ -60,7 +87,7 @@ fn main() -> Result<()> {
     init_logger()?;
     if let Err(err) = prepare() {
         error!("{}", err.to_string());
-        return Err(err)
+        return Err(err);
     }
     let app = Rc::new(RefCell::new(App::new())); // TODO app is useless for now
     start_ui(app)?;
