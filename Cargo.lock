@@ -1135,7 +1135,7 @@ dependencies = [
 
 [[package]]
 name = "rauschen"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "crossterm 0.23.0",
  "dirs",
