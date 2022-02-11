@@ -15,7 +15,7 @@ pub enum AppState {
 impl AppState {
     pub fn initialized() -> Self {
         let mut signal = RandomSignal::new(0, 100);
-        let current_volume = 10;
+        let current_volume = 100;
         let sparkline_data =  signal.by_ref().take(200).collect::<Vec<u64>>();
 
         Self::Initialized {
