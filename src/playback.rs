@@ -5,8 +5,8 @@ use std::{
     thread,
 };
 
-use log::error;
-use rodio::{Decoder, OutputStream, Sink};
+use log::{error, debug};
+use rodio::{Decoder, OutputStream, Sink, Source};
 
 use crate::home;
 
@@ -34,6 +34,7 @@ pub fn start_playback() -> Sender<PlaybackControl> {
 
         loop {
             if sink.empty() {
+                debug!("Sink is empty");
                 let file = File::open(filename.clone()).map_err(|err| {
                     error!("{}", err.to_string());
                     panic!("{}", err)
@@ -42,6 +43,7 @@ pub fn start_playback() -> Sender<PlaybackControl> {
                 .unwrap();
 
                 let source = Decoder::new(file)
+                .and_then(|source| Ok(source.repeat_infinite()))
                 .and_then(|source| Ok(sink.append(source)));
                 if let Err(error) = source {
                     error!("{}", error.to_string());
