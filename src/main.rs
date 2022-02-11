@@ -1,13 +1,22 @@
 use app::{App, AppReturn};
-use inputs::InputEvent;
 use inputs::events::Events;
+use inputs::InputEvent;
+use log4rs::append::rolling_file::policy::compound::roll::fixed_window::FixedWindowRoller;
+use log4rs::append::rolling_file::policy::compound::trigger::size::SizeTrigger;
+use log4rs::append::rolling_file::policy::compound::CompoundPolicy;
+use log4rs::append::rolling_file::RollingFileAppender;
+use log4rs::filter::threshold::ThresholdFilter;
 use std::cell::RefCell;
 use std::fs::File;
 use std::rc::Rc;
 use std::time::Duration;
 
-use std::io::{stdout, self};
+use std::io::{self, stdout, Cursor};
 
+use log::{error, LevelFilter};
+use log4rs::append::file::FileAppender;
+use log4rs::config::{Appender, Config, Root};
+use log4rs::encode::pattern::PatternEncoder;
 use tui::backend::CrosstermBackend;
 use tui::Terminal;
 
@@ -15,32 +24,72 @@ use crate::app::ui;
 use eyre::Result;
 
 mod app;
+mod home;
 mod inputs;
 mod playback;
-mod home;
-
 
 fn prepare() -> Result<()> {
-    let file_url = "https://github.com/schultyy/rauschen/blob/add-tui/resources/eurostar-car.ogg?raw=true";
+    let file_url =
+        "https://github.com/schultyy/rauschen/raw/main/resources/eurostar-car.ogg";
     let app_dir = home::app_dir();
     let local_filename = app_dir.join("eurostar-car.ogg");
 
     home::create_home_dir_if_not_exist()?;
 
     if local_filename.exists() {
-        return Ok(())
+        return Ok(());
     }
 
-    let mut response = reqwest::blocking::get(file_url)?;
+    let response = reqwest::blocking::get(file_url)?;
     let mut out = File::create(app_dir.join(local_filename)).expect("failed to create file");
-    io::copy(&mut response, &mut out).expect("failed to copy content");
+    let mut content =  Cursor::new(response.bytes()?);
+    std::io::copy(&mut content, &mut out).expect("failed to copy content");
 
     Ok(())
 }
 
+fn init_logger() -> Result<()> {
+    let window_size = 3; // log0, log1, log2
+    let fixed_window_roller = FixedWindowRoller::builder()
+        .build("log{}", window_size)
+        .unwrap();
+
+    let size_limit = 5 * 1024; // 5KB as max log file size to roll
+    let size_trigger = SizeTrigger::new(size_limit);
+    let compound_policy =
+        CompoundPolicy::new(Box::new(size_trigger), Box::new(fixed_window_roller));
+
+    let logfile_path = home::app_dir().join("output.log");
+
+    let config = Config::builder()
+    .appender(
+        Appender::builder()
+            .filter(Box::new(ThresholdFilter::new(LevelFilter::Debug)))
+            .build(
+                "logfile",
+                Box::new(
+                    RollingFileAppender::builder()
+                        .encoder(Box::new(PatternEncoder::new("{d} {l} {t}::{m}{n}")))
+                        .build(logfile_path, Box::new(compound_policy))?,
+                ),
+            ),
+    )
+    .build(
+        Root::builder()
+            .appender("logfile")
+            .build(LevelFilter::Debug),
+    )?;
+
+    log4rs::init_config(config)?;
+    Ok(())
+}
 
 fn main() -> Result<()> {
-    prepare()?;
+    init_logger()?;
+    if let Err(err) = prepare() {
+        error!("{}", err.to_string());
+        return Err(err);
+    }
     let app = Rc::new(RefCell::new(App::new())); // TODO app is useless for now
     start_ui(app)?;
     Ok(())
