@@ -11,10 +11,9 @@ use std::fs::File;
 use std::rc::Rc;
 use std::time::Duration;
 
-use std::io::{self, stdout, Cursor};
+use std::io::{stdout, Cursor};
 
 use log::{error, LevelFilter};
-use log4rs::append::file::FileAppender;
 use log4rs::config::{Appender, Config, Root};
 use log4rs::encode::pattern::PatternEncoder;
 use tui::backend::CrosstermBackend;
