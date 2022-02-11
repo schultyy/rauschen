@@ -11,7 +11,6 @@ where
     B: Backend,
 {
     let size = rect.size();
-    check_size(&size);
 
     // Vertical layout
     let chunks = Layout::default()
@@ -37,13 +36,4 @@ where
         .data(&app.state().sparkline_data().unwrap())
         .style(Style::default().fg(Color::Yellow));
     rect.render_widget(sparkline, chunks[1]);
-}
-
-fn check_size(rect: &Rect) {
-    if rect.width < 52 {
-        panic!("Require width >= 52, (got {})", rect.width);
-    }
-    if rect.height < 28 {
-        panic!("Require height >= 28, (got {})", rect.height);
-    }
 }
