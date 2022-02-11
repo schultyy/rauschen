@@ -1,30 +1,38 @@
 
-use crate::playback;
+use std::sync::mpsc::Sender;
+
+use log::error;
+
+use crate::playback::{self, PlaybackControl};
 
 use super::random_signal::RandomSignal;
 
 pub enum AppState {
     Init,
     Initialized {
-        volume: u16,
+        volume: f32,
         signal: RandomSignal,
         sparkline_data: Vec<u64>,
+        playback_remote: Sender<PlaybackControl>
     },
 }
 
 impl AppState {
     pub fn initialized() -> Self {
         let mut signal = RandomSignal::new(0, 100);
-        let current_volume = 100;
+        let current_volume = 1.00;
         let sparkline_data =  signal.by_ref().take(200).collect::<Vec<u64>>();
 
-        playback::start_playback();
-        playback::set_cmd(current_volume);
+        let playback_remote = playback::start_playback();
+        if let Err(err) = playback_remote.send(PlaybackControl::VolumeUp(current_volume)) {
+            error!("{}", err);
+        }
 
         Self::Initialized {
             volume: current_volume,
             signal,
             sparkline_data,
+            playback_remote
         }
     }
 
@@ -33,26 +41,30 @@ impl AppState {
     }
 
     pub fn incr_volume(&mut self) {
-        if let Self::Initialized { volume, .. } = self {
-            *volume += 10;
-            if volume >= &mut 100 {
-                *volume = 100;
+        if let Self::Initialized { volume, playback_remote, .. } = self {
+            *volume += 0.1;
+            if volume >= &mut 1.0 {
+                *volume = 1.0;
             }
-            playback::set_cmd(volume.to_owned());
+            if let Err(err) = playback_remote.send(PlaybackControl::VolumeUp(volume.to_owned())) {
+                error!("{}", err);
+            }
         }
     }
 
     pub fn decr_volume(&mut self) {
-        if let Self::Initialized { volume, .. } = self {
-            let step: u16 = 10;
+        if let Self::Initialized { volume, playback_remote, .. } = self {
+            let step = 0.1;
             if volume.clone() - step >= step {
-                *volume -= 10;
+                *volume -= step;
             }
-            playback::set_cmd(volume.to_owned());
+            if let Err(err) = playback_remote.send(PlaybackControl::VolumeDown(volume.to_owned())) {
+                error!("{}", err);
+            }
         }
     }
 
-    pub fn volume(&self) -> Option<u16> {
+    pub fn volume(&self) -> Option<f32> {
         if let Self::Initialized { volume, .. } = self {
             Some(*volume)
         } else {
