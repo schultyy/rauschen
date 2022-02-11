@@ -11,7 +11,7 @@ use std::fs::File;
 use std::rc::Rc;
 use std::time::Duration;
 
-use std::io::{self, stdout};
+use std::io::{self, stdout, Cursor};
 
 use log::{error, LevelFilter};
 use log4rs::append::file::FileAppender;
@@ -30,7 +30,7 @@ mod playback;
 
 fn prepare() -> Result<()> {
     let file_url =
-        "https://github.com/schultyy/rauschen/blob/add-tui/resources/eurostar-car.ogg?raw=true";
+        "https://github.com/schultyy/rauschen/raw/main/resources/eurostar-car.ogg";
     let app_dir = home::app_dir();
     let local_filename = app_dir.join("eurostar-car.ogg");
 
@@ -40,9 +40,10 @@ fn prepare() -> Result<()> {
         return Ok(());
     }
 
-    let mut response = reqwest::blocking::get(file_url)?;
+    let response = reqwest::blocking::get(file_url)?;
     let mut out = File::create(app_dir.join(local_filename)).expect("failed to create file");
-    io::copy(&mut response, &mut out).expect("failed to copy content");
+    let mut content =  Cursor::new(response.bytes()?);
+    std::io::copy(&mut content, &mut out).expect("failed to copy content");
 
     Ok(())
 }
