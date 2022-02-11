@@ -7,6 +7,14 @@ use crate::playback::{self, PlaybackControl};
 
 use super::random_signal::RandomSignal;
 
+macro_rules! log_error {
+    ($fmt:expr) => {{
+        if let Err(err) = $fmt {
+            error!("{}", err.to_string());
+        }
+    }};
+}
+
 pub enum AppState {
     Init,
     Initialized {
@@ -24,9 +32,7 @@ impl AppState {
         let sparkline_data =  signal.by_ref().take(200).collect::<Vec<u64>>();
 
         let playback_remote = playback::start_playback();
-        if let Err(err) = playback_remote.send(PlaybackControl::VolumeUp(current_volume)) {
-            error!("{}", err);
-        }
+        log_error!(playback_remote.send(PlaybackControl::VolumeUp(current_volume)));
 
         Self::Initialized {
             volume: current_volume,
@@ -46,9 +52,7 @@ impl AppState {
             if volume >= &mut 1.0 {
                 *volume = 1.0;
             }
-            if let Err(err) = playback_remote.send(PlaybackControl::VolumeUp(volume.to_owned())) {
-                error!("{}", err);
-            }
+            log_error!(playback_remote.send(PlaybackControl::VolumeUp(volume.to_owned())));
         }
     }
 
@@ -58,9 +62,7 @@ impl AppState {
             if volume.clone() - step >= step {
                 *volume -= step;
             }
-            if let Err(err) = playback_remote.send(PlaybackControl::VolumeDown(volume.to_owned())) {
-                error!("{}", err);
-            }
+            log_error!(playback_remote.send(PlaybackControl::VolumeDown(volume.to_owned())));
         }
     }
 
