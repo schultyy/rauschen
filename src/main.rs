@@ -3,11 +3,10 @@ use inputs::InputEvent;
 use inputs::events::Events;
 use std::cell::RefCell;
 use std::fs::File;
-use std::path::Path;
 use std::rc::Rc;
 use std::time::Duration;
 
-use std::io::{stdout, Write, self};
+use std::io::{stdout, self};
 
 use tui::backend::CrosstermBackend;
 use tui::Terminal;
