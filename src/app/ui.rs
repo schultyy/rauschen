@@ -19,10 +19,13 @@ where
         .constraints([Constraint::Length(3), Constraint::Min(10)].as_ref())
         .split(size);
 
+
+    let volume_level = app.state().volume().unwrap() * 100.00;
+
     let gauge = Gauge::default()
         .block(Block::default().title("Volume").borders(Borders::ALL))
         .gauge_style(Style::default().fg(Color::Yellow))
-        .percent(app.state().volume().unwrap());
+        .percent(volume_level as u16);
     rect.render_widget(gauge, chunks[0]);
 
     let sparkline = Sparkline::default()

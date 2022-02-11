@@ -1,4 +1,4 @@
-use crate::inputs::key::Key;
+use crate::{inputs::key::Key};
 
 use self::{
     actions::{Action, Actions},
@@ -28,6 +28,7 @@ impl App {
     pub fn new() -> Self {
         let actions = vec![Action::Quit, Action::VolumeUp, Action::VolumeDown].into();
         let state = AppState::initialized();
+
         Self { actions, state }
     }
 

@@ -11,10 +11,9 @@ use std::fs::File;
 use std::rc::Rc;
 use std::time::Duration;
 
-use std::io::{self, stdout, Cursor};
+use std::io::{stdout, Cursor};
 
 use log::{error, LevelFilter};
-use log4rs::append::file::FileAppender;
 use log4rs::config::{Appender, Config, Root};
 use log4rs::encode::pattern::PatternEncoder;
 use tui::backend::CrosstermBackend;
@@ -107,8 +106,6 @@ pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     // User event handler
     let tick_rate = Duration::from_millis(200);
     let events = Events::new(tick_rate);
-    playback::start_playback();
-    playback::set_cmd(app.borrow().state().volume().unwrap());
 
     loop {
         let mut app = app.borrow_mut();
