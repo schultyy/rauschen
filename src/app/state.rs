@@ -18,6 +18,9 @@ impl AppState {
         let current_volume = 100;
         let sparkline_data =  signal.by_ref().take(200).collect::<Vec<u64>>();
 
+        playback::start_playback();
+        playback::set_cmd(current_volume);
+
         Self::Initialized {
             volume: current_volume,
             signal,

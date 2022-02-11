@@ -106,8 +106,6 @@ pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     // User event handler
     let tick_rate = Duration::from_millis(200);
     let events = Events::new(tick_rate);
-    playback::start_playback();
-    playback::set_cmd(app.borrow().state().volume().unwrap());
 
     loop {
         let mut app = app.borrow_mut();
