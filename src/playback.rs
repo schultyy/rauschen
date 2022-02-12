@@ -52,23 +52,13 @@ pub fn start_playback() -> Sender<PlaybackControl> {
             }
 
             match rx.recv().unwrap() {
-                PlaybackControl::VolumeUp(new_volume) => {
-                    if new_volume >= 100.00 {
-                        sink.set_volume(100.00);
-                    }
-                    else {
-                        sink.set_volume(new_volume);
-                    }
-                },
-                PlaybackControl::VolumeDown(new_volume) => {
+                PlaybackControl::VolumeUp(new_volume) | PlaybackControl::VolumeDown(new_volume) => {
                     sink.set_volume(new_volume);
                 },
                 PlaybackControl::Play => {
                     sink.play();
                 },
             }
-
-            // thread::sleep(Duration::from_millis(250));
         }
     });
 
