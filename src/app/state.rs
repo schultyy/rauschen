@@ -32,7 +32,7 @@ impl AppState {
         let sparkline_data =  signal.by_ref().take(200).collect::<Vec<u64>>();
 
         let playback_remote = playback::start_playback();
-        log_error!(playback_remote.send(PlaybackControl::VolumeUp(current_volume)));
+        log_error!(playback_remote.send(PlaybackControl::VolumeUp(2.0)));
 
         Self::Initialized {
             volume: current_volume,
@@ -48,11 +48,15 @@ impl AppState {
 
     pub fn incr_volume(&mut self) {
         if let Self::Initialized { volume, playback_remote, .. } = self {
-            *volume += 0.1;
-            if volume >= &mut 1.0 {
+            let volume_step = 0.1;
+            if volume.clone() + volume_step >= 1.00 {
                 *volume = 1.0;
             }
-            log_error!(playback_remote.send(PlaybackControl::VolumeUp(volume.to_owned())));
+            else {
+                *volume = volume.clone() + volume_step;
+            }
+
+            log_error!(playback_remote.send(PlaybackControl::VolumeUp(*volume * 200.00 / 100.00)));
         }
     }
 
@@ -62,7 +66,10 @@ impl AppState {
             if volume.clone() - step >= step {
                 *volume -= step;
             }
-            log_error!(playback_remote.send(PlaybackControl::VolumeDown(volume.to_owned())));
+            else {
+                *volume = 0.0;
+            }
+            log_error!(playback_remote.send(PlaybackControl::VolumeDown(*volume * 200.00 / 100.00)));
         }
     }
 
